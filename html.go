@@ -23,6 +23,7 @@ type compress struct {
 	DistURL   string
 	Groups    map[string]Group
 	IsProMode bool
+	caches    map[string]template.HTML
 }
 
 func (c *compress) SetProMode(isPro bool) {
@@ -58,6 +59,15 @@ func (c *compressCss) CompressCss(name string) template.HTML {
 func generateHTML(name string, c compress, t *template.Template) template.HTML {
 	if group, ok := c.Groups[name]; ok {
 		if c.IsProMode {
+
+			if c.caches == nil {
+				c.caches = make(map[string]template.HTML, len(c.Groups))
+			}
+
+			if scripts, ok := c.caches[name]; ok {
+				return scripts
+			}
+
 			scripts := fmt.Sprintf("<!-- Beego Compress Powered -->\n\t")
 
 			filePath := filepath.Join(c.DistPath, group.DistFile)
@@ -76,7 +86,9 @@ func generateHTML(name string, c compress, t *template.Template) template.HTML {
 			}
 
 			if len(scripts) > 0 {
-				return template.HTML(scripts + "\n")
+				res := template.HTML(scripts + "\n")
+				c.caches[name] = res
+				return res
 			}
 		} else {
 			scripts := make([]string, 0, len(group.SourceFiles)+2)
