@@ -45,6 +45,11 @@ func (s *Settings) RunCommand(params ...string) {
 	}
 }
 
+func (s *Settings) RunCompress(force, skip, verbose bool) {
+	compressJsFiles(s, force, skip, verbose)
+	compressCssFiles(s, force, skip, verbose)
+}
+
 func printHelp(errs ...string) {
 	content := `compress command usage:
 
