@@ -102,7 +102,7 @@ func generateHTML(name string, c compress, t *template.Template) template.HTML {
 				filePath := filepath.Join(c.SrcPath, file)
 
 				if info, err := os.Stat(filePath); err == nil {
-					URL := c.StaticURL + path.Join(c.SrcPath, file) + "?ver=" + fmt.Sprint(info.ModTime().Unix())
+					URL := c.StaticURL + path.Join(c.SrcURL, file) + "?ver=" + fmt.Sprint(info.ModTime().Unix())
 
 					if res, err := parseTmpl(t, map[string]string{"URL": URL}); err != nil {
 						scripts = append(scripts, errHtml("template execution error: %s", err))
