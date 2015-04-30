@@ -1,3 +1,6 @@
+// Beego Compress provides an automated system for compressing JavaScript and CSS files.
+//
+// Please see README.md in the source code root for more information.
 package compress
 
 import (
