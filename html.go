@@ -71,7 +71,7 @@ func generateHTML(name string, c compress, t *template.Template) template.HTML {
 			// NOTE: Because the generated HTMl might be inside an XML comment like <!--[if IE 7]>,
 			//       it cannot contain another XML comment (<!--...-->).
 			//       JavaScript comments provide a good workaround for this.
-			scripts := fmt.Sprintf("<script>/* Powered by Beego Compress */</script>\n\t")
+			scripts := "<script>/* Powered by Beego Compress */</script>\n\t"
 
 			filePath := filepath.Join(c.DistPath, group.DistFile)
 			if info, err := os.Stat(filePath); err == nil {
@@ -116,7 +116,7 @@ func generateHTML(name string, c compress, t *template.Template) template.HTML {
 				}
 			}
 
-			scripts = append(scripts, fmt.Sprintf("<script>/* end */</script>"))
+			scripts = append(scripts, "<script>/* end */</script>")
 
 			return template.HTML(strings.Join(scripts, "\n\t"))
 		}
