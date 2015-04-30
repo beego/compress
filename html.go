@@ -45,7 +45,7 @@ type compressJs struct {
 }
 
 func (c *compressJs) CompressJs(name string) template.HTML {
-	return generateHTML(name, c.compress, JsTagTemplate)
+	return generateHTML(name, &c.compress, JsTagTemplate)
 }
 
 type compressCss struct {
@@ -53,10 +53,10 @@ type compressCss struct {
 }
 
 func (c *compressCss) CompressCss(name string) template.HTML {
-	return generateHTML(name, c.compress, CssTagTemplate)
+	return generateHTML(name, &c.compress, CssTagTemplate)
 }
 
-func generateHTML(name string, c compress, t *template.Template) template.HTML {
+func generateHTML(name string, c *compress, t *template.Template) template.HTML {
 	if group, ok := c.Groups[name]; ok {
 		if c.IsProductionMode {
 
