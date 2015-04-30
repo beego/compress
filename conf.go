@@ -57,7 +57,7 @@ func NewCssCompress(srcPath, distPath, srcURL, distURL string, groups map[string
 	return compress
 }
 
-func LoadJsonConf(filePath string, proMode bool, staticURL string) (setting *Settings, err error) {
+func LoadJsonConf(filePath string, productionMode bool, staticURL string) (setting *Settings, err error) {
 	type Conf struct {
 		Js  *compressJs
 		Css *compressCss
@@ -96,8 +96,8 @@ func LoadJsonConf(filePath string, proMode bool, staticURL string) (setting *Set
 		staticURL = "/"
 	}
 
-	setting.Js.SetProMode(proMode)
-	setting.Css.SetProMode(proMode)
+	setting.Js.SetProMode(productionMode)
+	setting.Css.SetProMode(productionMode)
 
 	setting.Js.SetStaticURL(staticURL)
 	setting.Css.SetStaticURL(staticURL)

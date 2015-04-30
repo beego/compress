@@ -16,18 +16,18 @@ type Group struct {
 }
 
 type compress struct {
-	StaticURL string
-	SrcPath   string
-	DistPath  string
-	SrcURL    string
-	DistURL   string
-	Groups    map[string]Group
-	IsProMode bool
-	caches    map[string]template.HTML
+	StaticURL        string
+	SrcPath          string
+	DistPath         string
+	SrcURL           string
+	DistURL          string
+	Groups           map[string]Group
+	IsProductionMode bool
+	caches           map[string]template.HTML
 }
 
-func (c *compress) SetProMode(isPro bool) {
-	c.IsProMode = isPro
+func (c *compress) SetProMode(isProductionMode bool) {
+	c.IsProductionMode = isProductionMode
 }
 
 func (c *compress) SetStaticURL(url string) {
@@ -58,7 +58,7 @@ func (c *compressCss) CompressCss(name string) template.HTML {
 
 func generateHTML(name string, c compress, t *template.Template) template.HTML {
 	if group, ok := c.Groups[name]; ok {
-		if c.IsProMode {
+		if c.IsProductionMode {
 
 			if c.caches == nil {
 				c.caches = make(map[string]template.HTML, len(c.Groups))
