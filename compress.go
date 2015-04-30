@@ -91,11 +91,11 @@ func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 
 				source := buf.String()
 				if verbose {
-					fmt.Fprintf(os.Stdout, "compress file %s ... ", sourceFile)
+					fmt.Fprintf(os.Stdout, "compressing file %s ... ", sourceFile)
 				}
 				if skips[file] {
 					if verbose {
-						fmt.Fprintf(os.Stdout, "skiped ")
+						fmt.Fprintf(os.Stdout, "skipping compression")
 					}
 				} else {
 					for _, filter := range filters {
@@ -112,7 +112,7 @@ func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 						if _, err := f.WriteString(source); err == nil {
 							hasModified = true
 							if verbose {
-								logInfo("saved")
+								logInfo("saved file")
 							}
 						} else {
 							writeErr = err
@@ -140,7 +140,7 @@ func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 				}
 
 				if verbose {
-					logInfo("use cache file %s", cacheFile)
+					logInfo("using cached file %s", cacheFile)
 				}
 				sources = append(sources, buf.String())
 			}

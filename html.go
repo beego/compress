@@ -68,21 +68,21 @@ func generateHTML(name string, c compress, t *template.Template) template.HTML {
 				return scripts
 			}
 
-			scripts := fmt.Sprintf("<script>/* Beego Compress Powered */</script>\n\t")
+			scripts := fmt.Sprintf("<script>/* Powered by Beego Compress */</script>\n\t")
 
 			filePath := filepath.Join(c.DistPath, group.DistFile)
 			if info, err := os.Stat(filePath); err == nil {
 				URL := c.StaticURL + path.Join(c.DistURL, group.DistFile) + "?ver=" + fmt.Sprint(info.ModTime().Unix())
 
 				if res, err := parseTmpl(t, map[string]string{"URL": URL}); err != nil {
-					errHtml("tempalte execute error: %s", err)
+					errHtml("template execution error: %s", err)
 
 				} else {
 					scripts += res
 				}
 
 			} else {
-				errHtml("load file `%s` for path `%s` error: %s", group.DistFile, filePath, err.Error())
+				errHtml("loading file `%s` from path `%s` failed: %s", group.DistFile, filePath, err.Error())
 			}
 
 			if len(scripts) > 0 {
@@ -102,14 +102,14 @@ func generateHTML(name string, c compress, t *template.Template) template.HTML {
 					URL := c.StaticURL + path.Join(c.SrcPath, file) + "?ver=" + fmt.Sprint(info.ModTime().Unix())
 
 					if res, err := parseTmpl(t, map[string]string{"URL": URL}); err != nil {
-						scripts = append(scripts, errHtml("tempalte execute error: %s", err))
+						scripts = append(scripts, errHtml("template execution error: %s", err))
 
 					} else {
 						scripts = append(scripts, res)
 					}
 
 				} else {
-					scripts = append(scripts, errHtml("load file `%s` for path `%s` error: %s", file, filePath, err.Error()))
+					scripts = append(scripts, errHtml("loading file `%s` from path `%s` failed: %s", file, filePath, err.Error()))
 				}
 			}
 
@@ -118,7 +118,7 @@ func generateHTML(name string, c compress, t *template.Template) template.HTML {
 			return template.HTML(strings.Join(scripts, "\n\t"))
 		}
 	} else {
-		return template.HTML(errHtml("not found compress group `%s`", name))
+		return template.HTML(errHtml("compression group `%s` was not found", name))
 	}
 
 	return ""
