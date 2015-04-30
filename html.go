@@ -68,56 +68,24 @@ func generateHTML(name string, c *compress, t *template.Template) template.HTML 
 				return scripts
 			}
 
-			// NOTE: Because the generated HTMl might be inside an XML comment like <!--[if IE 7]>,
-			//       it cannot contain another XML comment (<!--...-->).
-			//       JavaScript comments provide a good workaround for this.
-			scripts := "<script>/* Powered by Beego Compress */</script>\n\t"
-
-			filePath := filepath.Join(c.DistPath, group.DistFile)
-			if info, err := os.Stat(filePath); err == nil {
-				URL := c.StaticURL + path.Join(c.DistURL, group.DistFile) + "?ver=" + fmt.Sprint(info.ModTime().Unix())
-
-				if res, err := parseTmpl(t, map[string]string{"URL": URL}); err != nil {
-					errHtml("template execution error: %s", err)
-
-				} else {
-					scripts += res
-				}
-
-			} else {
-				errHtml("loading file `%s` from path `%s` failed: %s", group.DistFile, filePath, err.Error())
-			}
-
-			if len(scripts) > 0 {
-				res := template.HTML(scripts + "\n")
+			if scripts := generateHTMLForFile(c.DistPath, c.DistURL, group.DistFile, c, t); len(scripts) > 0 {
+				// NOTE: Because the generated HTMl might be inside an XML comment like <!--[if IE 7]>,
+				//       it cannot contain another XML comment (<!--...-->).
+				//       JavaScript comments provide a good workaround for this.
+				preamble := "<script>/* Powered by Beego Compress */</script>\n\t"
+				res := template.HTML(preamble + scripts + "\n")
 				c.caches[name] = res
 				return res
 			}
 		} else {
 			scripts := make([]string, 0, len(group.SourceFiles)+2)
-
 			scripts = append(scripts, fmt.Sprintf("<script>/* Beego Compress group `%s` begin */</script>", name))
 
 			for _, file := range group.SourceFiles {
-				filePath := filepath.Join(c.SrcPath, file)
-
-				if info, err := os.Stat(filePath); err == nil {
-					URL := c.StaticURL + path.Join(c.SrcURL, file) + "?ver=" + fmt.Sprint(info.ModTime().Unix())
-
-					if res, err := parseTmpl(t, map[string]string{"URL": URL}); err != nil {
-						scripts = append(scripts, errHtml("template execution error: %s", err))
-
-					} else {
-						scripts = append(scripts, res)
-					}
-
-				} else {
-					scripts = append(scripts, errHtml("loading file `%s` from path `%s` failed: %s", file, filePath, err.Error()))
-				}
+				scripts = append(scripts, generateHTMLForFile(c.SrcPath, c.SrcURL, file, c, t))
 			}
 
 			scripts = append(scripts, "<script>/* end */</script>")
-
 			return template.HTML(strings.Join(scripts, "\n\t"))
 		}
 	} else {
@@ -125,4 +93,21 @@ func generateHTML(name string, c *compress, t *template.Template) template.HTML 
 	}
 
 	return ""
+}
+
+func generateHTMLForFile(basePath string, baseUrl string, file string, c *compress, t *template.Template) string {
+	filePath := filepath.Join(basePath, file)
+
+	if info, err := os.Stat(filePath); err == nil {
+		URL := c.StaticURL + path.Join(baseUrl, file) + "?ver=" + fmt.Sprint(info.ModTime().Unix())
+
+		if res, err := parseTmpl(t, map[string]string{"URL": URL}); err != nil {
+			return errHtml("template execution error: %s", err)
+		} else {
+			return res
+		}
+
+	} else {
+		return errHtml("loading file `%s` from path `%s` failed: %s", file, filePath, err.Error())
+	}
 }
