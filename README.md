@@ -1,32 +1,37 @@
 # Beego Compress
 
-Beego Compress provides an automated system for compressing JavaScript and Css files
+Beego Compress provides an automated system for compressing JavaScript and CSS files.
 
-It default use [Google Closure Compiler](https://code.google.com/p/closure-compiler/wiki/BinaryDownloads) for js, and [Yui Compressor](https://github.com/yui/yuicompressor/releases) for css
+By default, it uses the [Google Closure Compiler](https://code.google.com/p/closure-compiler/wiki/BinaryDownloads) for JS, and the [YUI Compressor](https://github.com/yui/yuicompressor/releases) for CSS.
+See [Customization Options](#customization-options) for how to changes these defaults.
 
 ## Sample Usage with Beego
 
-[After create a config file](#config-file), you can simple use it in beego.
+[After creating a config file](#config-file), you can simply use this library in your beego application by following the steps below:
 
-Move **compiler.jar** and **yuicompressor.jar** to your beego app path. Parallel with static path.
+Move **compiler.jar** and **yuicompressor.jar** to your beego applications main directory.
+This is usually the parent directory of your `static` asset directory.
 
-BTW: Of course you can integrated it with other framework or use it as a command line tool.
+BTW: This library does not depend on the main Beego framework.
+Therefore, you can easily integrate it with other frameworks, or use it in a standalone command line tool (see below).
+
+**Usage in your web application:**
 
 ```go
-func SettingCompress() {
-	// load json config file
-	isProductMode := false
-	setting, err := compress.LoadJsonConf("conf/compress.json", isProductMode, "http://127.0.0.1/")
+func SetupCompression() {
+	// Load JSON config file
+	isProductionMode := false
+	setting, err := compress.LoadJsonConf("conf/compress.json", isProductionMode, "http://127.0.0.1/")
 	if err != nil {
 		beego.Error(err)
 		return
 	}
 
-	// after use this api, can run command from shell.
-	setting.RunCommand()
+	// Uncomment the next line to enable usage as shown under "Command line usage":
+	// setting.RunCommand()
 
-	if isProductMode {
-		// if in product mode, can use this api auto compress files
+	if isProductionMode {
+		// For production mode: Use this method to automatically compress files.
 		setting.RunCompress(true, false, true)
 	}
 
@@ -36,7 +41,7 @@ func SettingCompress() {
 }
 ```
 
-In tempalte usage
+Usage in templates:
 
 ```html
 ...
@@ -49,9 +54,9 @@ In tempalte usage
 ...
 ```
 
-#### Congratulations!! Let's see html results.
+#### Congratulations! Let's look at the generated HTML:
 
-Render result when isProductMode is `false`
+Render result when isProductionMode is `false`:
 
 ```html
 <!-- Beego Compress group `lib` begin -->
@@ -73,7 +78,7 @@ Render result when isProductMode is `false`
 
 ```
 
-Render result when isProductMode is `true`
+Render result when isProductionMode is `true`:
 
 ```html
 <link rel="stylesheet" href="http://127.0.0.1:8092/static/css/lib.min.css?ver=1382346563" />
@@ -83,36 +88,36 @@ Render result when isProductMode is `true`
 
 ## Config file
 
-Full config file example.
+Full configuration file example.
 
-note: All json key are not case sensitive
+Note: All JSON key are not case sensitive.
 
 **compress.json:**
 
 ```
 {
 	"Js": {
-		// SrcPath is path of source file
+		// SrcPath is the path of (uncompressed) source file(s)
 		"SrcPath": "static_source/js",
-		// DistPath is path of compressed file
+		// DistPath is the path of compressed file(s)
 		"DistPath": "static/js",
-		// SrcURL is url prefix of source file
+		// SrcURL is the url prefix for the uncompressed files
 		"SrcURL": "static_source/js",
-		// DistURL is url prefix of compressed file
+		// DistURL is the url prefix for the compressed files
 		"DistURL": "static/js",
 		"Groups": {
-			// lib is the name of this compress group
+			// lib is the name of this compression group
 			"lib": {
-				// all compressed file will combined and save to DistFile
+				// All compressed files will be combined and saved to DistFile
 				"DistFile": "lib.min.js",
-				// source files of this group
+				// Source files of this group
 				"SourceFiles": [
 					"jquery.min.js",
 					"bootstrap.js",
 					"lib.min.js",
 					"jStorage.js"
 				],
-				// skip compress file list
+				// Files that should not be compressed
 				"SkipFiles": [
 					"jquery.min.js",
 					"lib.min.js"
@@ -128,7 +133,7 @@ note: All json key are not case sensitive
 		}
 	},
 	"Css": {
-		// config of css is same with js
+		// CSS configuration works analogous to JS configuration
 		"SrcPath": "static_source/css",
 		"DistPath": "static/css",
 		"SrcURL": "static_source/css",
@@ -152,9 +157,9 @@ note: All json key are not case sensitive
 }
 ```
 
-## Command mode
+## Command line usage
 
-when use api `setting.RunCommand()`
+When using the API `setting.RunCommand()`:
 
 ```
 $ go build app.go
@@ -165,37 +170,68 @@ compress command usage:
     css    - compress all css files
     all    - compress all files
 
+    Use "compress <command> -h" to get
+    more information on a command.
+
 $ ./app compress js -h
 Usage of compress command: js:
-  -force=false: force compress file
-  -skip=false: skip all cached file
-  -v=false: verbose info
+  -force=false: force recreation of dist file
+  -skip=false: force recompression of all files
+  -v=false: verbose logging on/off
 
 $ ./app compress css -h
 Usage of compress command: css:
-  -force=false: force compress file
-  -skip=false: skip all cached file
-  -v=false: verbose info
+  -force=false: force recreation of dist file
+  -skip=false: force recompression of all files
+  -v=false: verbose logging on/off
 ```
 
 ```
-use -force for re-create dist file but not skip cached.
-use -skip can skip all cached file and re-compress.
+use -force to recreate the dist file (even if there are no changes to it)
+use -skip to force recompression of all files (even if they have not changed)
 ```
 
-## Custom Compress
+Example application:
 
-All api can view in [GoWalker](http://gowalker.org/github.com/beego/compress)
+```go
+package main
 
-* [TmpPath](http://gowalker.org/github.com/beego/compress#_variables) is default path of cached files.
-* Can modify [JsFilters / CssFilters](http://gowalker.org/github.com/beego/compress#_variables) use your compress filter.
-* Can modify [JsTagTemplate / CssTagTemplate]((http://gowalker.org/github.com/beego/compress#_variables)) with your `<script>` `<link>` tag.
+import (
+	"github.com/beego/compress"
+)
 
-##  Contact and Issue
+func main() {
+	// Load JSON config file
+	isProductionMode := false
+	setting, err := compress.LoadJsonConf("conf/compress.json", isProductionMode, "http://127.0.0.1/")
+	if err != nil {
+		panic(err)
+	}
+
+	// Use this method to start the command when called from the shell.
+	// The arguments are read from os.Args.
+	setting.RunCommand()
+}
+
+```
+
+## Customization options
+
+The whole API can be viewed in [GoWalker](http://gowalker.org/github.com/beego/compress).
+
+* [TmpPath](http://gowalker.org/github.com/beego/compress#_variables) is the default path for caching generated files.
+
+* [JsFilters / CssFilters](http://gowalker.org/github.com/beego/compress#_variables) contains the slice of filter functions that are used to compress CSS and JS files, respectively.
+  The filters are applied in the same order as they are contained in the slice.
+  Each filter gets the output of the previous filter as its input.
+
+* [JsTagTemplate / CssTagTemplate](http://gowalker.org/github.com/beego/compress#_variables) is the [html/template.Template](http://golang.org/pkg/html/template/#Template) used to output `<script>` and `<link>` tags.
+
+##  Contact and Issue Tracking
 
 All beego projects need your support.
 
-Any suggestion are welcome, please [add new issue](https://github.com/beego/compress/issues/new) let me known.
+Any suggestions are welcome, please [add a new issue](https://github.com/beego/compress/issues/new) to let me know.
 
 ## LICENSE
 

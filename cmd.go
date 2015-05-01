@@ -56,7 +56,9 @@ func printHelp(errs ...string) {
     js     - compress all js files
     css    - compress all css files
     all    - compress all files
-`
+
+    Use "compress <command> -h" to get
+    more information on a command.`
 
 	if len(errs) > 0 {
 		fmt.Println(errs[0])
@@ -82,9 +84,9 @@ func (d *compressAll) Parse(args []string) {
 		name = "css"
 	}
 	flagSet := flag.NewFlagSet("compress command: "+name, flag.ExitOnError)
-	flagSet.BoolVar(&d.force, "force", false, "force compress file")
-	flagSet.BoolVar(&d.skip, "skip", false, "skip all cached file")
-	flagSet.BoolVar(&d.verbose, "v", false, "verbose info")
+	flagSet.BoolVar(&d.force, "force", false, "force recreation of dist file")
+	flagSet.BoolVar(&d.skip, "skip", false, "force recompression of all files")
+	flagSet.BoolVar(&d.verbose, "v", false, "verbose logging on/off")
 	flagSet.Parse(args)
 }
 
