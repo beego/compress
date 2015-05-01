@@ -76,7 +76,7 @@ func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 					modified = true
 				}
 			} else {
-				logError("source file %s load error: %s", sourceFile, err.Error())
+				logError("source file [%s] load error: %s", sourceFile, err.Error())
 				hasError = true
 				continue
 			}
@@ -88,14 +88,14 @@ func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 					buf.ReadFrom(f)
 					f.Close()
 				} else {
-					logError("source file %s load error: %s", sourceFile, err.Error())
+					logError("source file [%s] load error: %s", sourceFile, err.Error())
 					hasError = true
 					continue
 				}
 
 				source := buf.String()
 				if verbose {
-					logInfoNoNewline("compressing file %s ... ", sourceFile)
+					logInfoNoNewline("compressing file [%s] ... ", sourceFile)
 				}
 				if skips[file] {
 					if verbose {
@@ -141,13 +141,13 @@ func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 				if f, err := os.Open(cacheFile); err == nil {
 					buf.ReadFrom(f)
 				} else {
-					logError("cache file %s load error: %s", cacheFile, err.Error())
+					logError("cache file [%s] load error: %s", cacheFile, err.Error())
 					hasError = true
 					continue
 				}
 
 				if verbose {
-					logInfo("using cached file %s", cacheFile)
+					logInfo("using cached file [%s]", cacheFile)
 				}
 				sources = append(sources, buf.String())
 			}
@@ -162,7 +162,7 @@ func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 					if f, err := os.OpenFile(distFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644); err == nil {
 						if _, err := f.WriteString(strings.Join(sources, "\n\n")); err == nil {
 							if verbose {
-								logInfo("compressed file %s ... saved", distFile)
+								logInfo("compressed file [%s] ... saved", distFile)
 							}
 						} else {
 							writeErr = err
@@ -175,7 +175,7 @@ func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 				}
 
 				if writeErr != nil {
-					logError("compressed file %s write error: %s", distFile, writeErr.Error())
+					logError("compressed file [%s] write error: %s", distFile, writeErr.Error())
 					hasError = true
 				}
 			} else {
