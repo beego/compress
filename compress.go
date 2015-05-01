@@ -30,6 +30,10 @@ func logInfo(info string, args ...interface{}) {
 	fmt.Fprintln(os.Stdout, info)
 }
 
+func logInfoNoNewline(info string, args ...interface{}) {
+	fmt.Fprintf(os.Stdout, info, args...)
+}
+
 func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 	os.MkdirAll(TmpPath, 0755)
 
@@ -91,11 +95,11 @@ func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 
 				source := buf.String()
 				if verbose {
-					fmt.Fprintf(os.Stdout, "compressing file %s ... ", sourceFile)
+					logInfoNoNewline("compressing file %s ... ", sourceFile)
 				}
 				if skips[file] {
 					if verbose {
-						fmt.Fprintf(os.Stdout, "skipping compression")
+						logInfoNoNewline("skipping compression ... ")
 					}
 				} else {
 					for _, filter := range filters {
@@ -124,6 +128,9 @@ func compressFiles(c *compress, force, skip, verbose bool, filters []Filter) {
 				}
 
 				if writeErr != nil {
+					if verbose {
+						logInfo("")
+					}
 					logError("write error: %s", writeErr.Error())
 					hasError = true
 				}
