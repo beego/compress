@@ -165,22 +165,25 @@ compress command usage:
     css    - compress all css files
     all    - compress all files
 
+    Use "compress <command> -h" to get
+    more information on a command.
+
 $ ./app compress js -h
 Usage of compress command: js:
-  -force=false: force compress file
-  -skip=false: skip all cached file
-  -v=false: verbose info
+  -force=false: force recreation of dist file
+  -skip=false: force recompression of all files
+  -v=false: verbose logging on/off
 
 $ ./app compress css -h
 Usage of compress command: css:
-  -force=false: force compress file
-  -skip=false: skip all cached file
-  -v=false: verbose info
+  -force=false: force recreation of dist file
+  -skip=false: force recompression of all files
+  -v=false: verbose logging on/off
 ```
 
 ```
-use -force for re-create dist file but not skip cached.
-use -skip can skip all cached file and re-compress.
+use -force to recreate the dist file (even if there are no changes to it)
+use -skip to force recompression of all files (even if they have not changed)
 ```
 
 ## Custom Compress
