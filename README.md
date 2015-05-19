@@ -1,10 +1,10 @@
-# Beego Compress
+# beego Compress
 
-Beego Compress provides an automated system for compressing JavaScript and Css files
+beego Compress provides an automated system for compressing JavaScript and Css files
 
 It default use [Google Closure Compiler](https://code.google.com/p/closure-compiler/wiki/BinaryDownloads) for js, and [Yui Compressor](https://github.com/yui/yuicompressor/releases) for css
 
-## Sample Usage with Beego
+## Sample Usage with beego
 
 [After create a config file](#config-file), you can simple use it in beego.
 
@@ -54,19 +54,19 @@ In tempalte usage
 Render result when isProductMode is `false`
 
 ```html
-<!-- Beego Compress group `lib` begin -->
+<!-- beego Compress group `lib` begin -->
 <link rel="stylesheet" href="http://127.0.0.1/static_source/css/bootstrap.css?ver=1382331000" />
 <link rel="stylesheet" href="http://127.0.0.1/static_source/css/bootstrap-theme.css?ver=1382322974" />
 <link rel="stylesheet" href="http://127.0.0.1/static_source/css/font-awesome.min.css?ver=1378615042" />
 <link rel="stylesheet" href="http://127.0.0.1/static_source/css/select2.css?ver=1382197742" />
 <!-- end -->
-<!-- Beego Compress group `lib` begin -->
+<!-- beego Compress group `lib` begin -->
 <script type="text/javascript" src="http://127.0.0.1/static_source/js/jquery.min.js?ver=1378644427"></script>
 <script type="text/javascript" src="http://127.0.0.1/static_source/js/bootstrap.js?ver=1382328826"></script>
 <script type="text/javascript" src="http://127.0.0.1/static_source/js/lib.min.js?ver=1382328441"></script>
 <script type="text/javascript" src="http://127.0.0.1/static_source/js/jStorage.js?ver=1382271840"></script>
 <!-- end -->
-<!-- Beego Compress group `app` begin -->
+<!-- beego Compress group `app` begin -->
 <script type="text/javascript" src="http://127.0.0.1/static_source/js/main.js?ver=1382195678"></script>
 <script type="text/javascript" src="http://127.0.0.1/static_source/js/editor.js?ver=1382342779"></script>
 <!-- end -->
