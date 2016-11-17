@@ -68,7 +68,7 @@ func generateHTML(name string, c compress, t *template.Template) template.HTML {
 				return scripts
 			}
 
-			scripts := fmt.Sprintf("<script>/* Beego Compress Powered */</script>\n\t")
+			var scripts string
 
 			filePath := filepath.Join(c.DistPath, group.DistFile)
 			if info, err := os.Stat(filePath); err == nil {
