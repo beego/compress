@@ -2,21 +2,23 @@
 
 Beego Compress provides an automated system for compressing JavaScript and Css files
 
-It default use [Google Closure Compiler](https://code.google.com/p/closure-compiler/wiki/BinaryDownloads) for js, and [Yui Compressor](https://github.com/yui/yuicompressor/releases) for css
+It defaults to [Minify](https://github.com/tdewolff/minify) 
+
+Optionally you can use [Google Closure Compiler](https://code.google.com/p/closure-compiler/wiki/BinaryDownloads) for js, and [Yui Compressor](https://github.com/yui/yuicompressor/releases) for css
 
 ## Sample Usage with Beego
 
 [After create a config file](#config-file), you can simple use it in beego.
 
-Move **compiler.jar** and **yuicompressor.jar** to your beego app path. Parallel with static path.
+In case you will use the optional compilers, move **compiler.jar** and **yuicompressor.jar** to your beego app path. Parallel with static path.
 
 BTW: Of course you can integrated it with other framework or use it as a command line tool.
 
 ```go
 func SettingCompress() {
 	// load json config file
-	isProductMode := false
-	setting, err := compress.LoadJsonConf("conf/compress.json", isProductMode, "http://127.0.0.1/")
+	isProdMode := false  //production mode
+	setting, err := compress.LoadJsonConf("conf/compress.json", isProdMode, "http://127.0.0.1")
 	if err != nil {
 		beego.Error(err)
 		return
@@ -31,8 +33,8 @@ func SettingCompress() {
 	}
 
 	// add func to FuncMap for template use
-	beego.AddFuncMap("compress_js", setting.Js.CompressJs)
-	beego.AddFuncMap("compress_css", setting.Css.CompressCss)
+	beego.AddFuncMap("compress_js", setting.Js.Compress)
+	beego.AddFuncMap("compress_css", setting.Css.Compress)
 }
 ```
 
@@ -51,7 +53,7 @@ In tempalte usage
 
 #### Congratulations!! Let's see html results.
 
-Render result when isProductMode is `false`
+Render result when isProdMode is `false`
 
 ```html
 <!-- Beego Compress group `lib` begin -->
@@ -73,7 +75,7 @@ Render result when isProductMode is `false`
 
 ```
 
-Render result when isProductMode is `true`
+Render result when isProdMode is `true`
 
 ```html
 <link rel="stylesheet" href="http://127.0.0.1:8092/static/css/lib.min.css?ver=1382346563" />
@@ -92,6 +94,10 @@ note: All json key are not case sensitive
 ```
 {
 	"Js": {
+		//Only add FilterList if you want to use the external compilers
+		"FilterList": [
+			"ClosureFilter"
+		],	
 		// SrcPath is path of source file
 		"SrcPath": "static_source/js",
 		// DistPath is path of compressed file
@@ -128,6 +134,9 @@ note: All json key are not case sensitive
 		}
 	},
 	"Css": {
+		"FilterList": [
+			"YuiFilter"
+		],	
 		// config of css is same with js
 		"SrcPath": "static_source/css",
 		"DistPath": "static/css",
