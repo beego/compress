@@ -27,8 +27,8 @@ func SettingCompress() {
 	// after use this api, can run command from shell.
 	setting.RunCommand()
 
-	if isProductMode {
-		// if in product mode, can use this api auto compress files
+	if isProdMode {
+		// if in prod mode, can use this api auto compress files
 		setting.RunCompress(true, false, true)
 	}
 
