@@ -2,7 +2,7 @@
 
 Beego Compress provides an automated system for compressing JavaScript and Css files
 
-It defaults to [Minify](https://github.com/tdewolff/minify) 
+It defaults to [Minify](https://github.com/tdewolff/minify) which is a native Golang minifier.
 
 Optionally you can use [Google Closure Compiler](https://code.google.com/p/closure-compiler/wiki/BinaryDownloads) for js, and [Yui Compressor](https://github.com/yui/yuicompressor/releases) for css
 
