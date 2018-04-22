@@ -45,7 +45,6 @@ func (s *Settings) RunCommand(params ...string) {
 	}
 }
 
-
 func printHelp(errs ...string) {
 	content := `compress command usage:
 

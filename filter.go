@@ -1,13 +1,14 @@
 package compress
 
 import (
-	"github.com/tdewolff/minify"
-	"github.com/tdewolff/minify/css"
-	"github.com/tdewolff/minify/js"
 	"bytes"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/tdewolff/minify"
+	"github.com/tdewolff/minify/css"
+	"github.com/tdewolff/minify/js"
 )
 
 type Filter func(source string) string
