@@ -194,17 +194,17 @@ use -skip can skip all cached file and re-compress.
 
 ## Custom Compress
 
-All api can view in [GoWalker](http://gowalker.org/github.com/beego/compress)
+All api can view in [GoWalker](http://gowalker.org/github.com/gadelkareem/compress)
 
-* [TmpPath](http://gowalker.org/github.com/beego/compress#_variables) is default path of cached files.
-* Can modify [JsFilters / CssFilters](http://gowalker.org/github.com/beego/compress#_variables) use your compress filter.
-* Can modify [JsTagTemplate / CssTagTemplate]((http://gowalker.org/github.com/beego/compress#_variables)) with your `<script>` `<link>` tag.
+* [TmpPath](http://gowalker.org/github.com/gadelkareem/compress#_variables) is default path of cached files.
+* Can modify [JsFilters / CssFilters](http://gowalker.org/github.com/gadelkareem/compress#_variables) use your compress filter.
+* Can modify [JsTagTemplate / CssTagTemplate]((http://gowalker.org/github.com/gadelkareem/compress#_variables)) with your `<script>` `<link>` tag.
 
 ##  Contact and Issue
 
 All beego projects need your support.
 
-Any suggestion are welcome, please [add new issue](https://github.com/beego/compress/issues/new) let me known.
+Any suggestion are welcome, please [add new issue](https://github.com/gadelkareem/compress/issues/new) let me known.
 
 ## LICENSE
 
