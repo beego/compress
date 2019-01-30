@@ -88,7 +88,7 @@ func (d *compressAll) Run(s *Settings) error {
 		s.Js.compressFiles(d.force, d.skip, d.verbose)
 	}
 	if d.css {
-		s.Js.compressFiles(d.force, d.skip, d.verbose)
+		s.Css.compressFiles(d.force, d.skip, d.verbose)
 	}
 	return nil
 }
