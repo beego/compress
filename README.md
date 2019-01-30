@@ -2,21 +2,23 @@
 
 Beego Compress provides an automated system for compressing JavaScript and Css files
 
-It default use [Google Closure Compiler](https://code.google.com/p/closure-compiler/wiki/BinaryDownloads) for js, and [Yui Compressor](https://github.com/yui/yuicompressor/releases) for css
+It defaults to [Minify](https://github.com/tdewolff/minify) which is a native Golang minifier.
+
+Optionally you can use [Google Closure Compiler](https://code.google.com/p/closure-compiler/wiki/BinaryDownloads) for js, and [Yui Compressor](https://github.com/yui/yuicompressor/releases) for css
 
 ## Sample Usage with Beego
 
 [After create a config file](#config-file), you can simple use it in beego.
 
-Move **compiler.jar** and **yuicompressor.jar** to your beego app path. Parallel with static path.
+In case you will use the optional compilers, move **compiler.jar** and **yuicompressor.jar** to your beego app path. Parallel with static path.
 
 BTW: Of course you can integrated it with other framework or use it as a command line tool.
 
 ```go
 func SettingCompress() {
 	// load json config file
-	isProductMode := false
-	setting, err := compress.LoadJsonConf("conf/compress.json", isProductMode, "http://127.0.0.1/")
+	isProdMode := false  //production mode
+	setting, err := compress.LoadJsonConf("conf/compress.json", isProdMode, "http://127.0.0.1")
 	if err != nil {
 		beego.Error(err)
 		return
@@ -25,14 +27,14 @@ func SettingCompress() {
 	// after use this api, can run command from shell.
 	setting.RunCommand()
 
-	if isProductMode {
-		// if in product mode, can use this api auto compress files
+	if isProdMode {
+		// if in prod mode, can use this api auto compress files
 		setting.RunCompress(true, false, true)
 	}
 
 	// add func to FuncMap for template use
-	beego.AddFuncMap("compress_js", setting.Js.CompressJs)
-	beego.AddFuncMap("compress_css", setting.Css.CompressCss)
+	beego.AddFuncMap("compress_js", setting.Js.Compress)
+	beego.AddFuncMap("compress_css", setting.Css.Compress)
 }
 ```
 
@@ -51,7 +53,7 @@ In tempalte usage
 
 #### Congratulations!! Let's see html results.
 
-Render result when isProductMode is `false`
+Render result when isProdMode is `false`
 
 ```html
 <!-- Beego Compress group `lib` begin -->
@@ -73,7 +75,7 @@ Render result when isProductMode is `false`
 
 ```
 
-Render result when isProductMode is `true`
+Render result when isProdMode is `true`
 
 ```html
 <link rel="stylesheet" href="http://127.0.0.1:8092/static/css/lib.min.css?ver=1382346563" />
@@ -92,6 +94,10 @@ note: All json key are not case sensitive
 ```
 {
 	"Js": {
+		//Only add FilterList if you want to use the external compilers
+		"FilterList": [
+			"ClosureFilter"
+		],	
 		// SrcPath is path of source file
 		"SrcPath": "static_source/js",
 		// DistPath is path of compressed file
@@ -128,6 +134,9 @@ note: All json key are not case sensitive
 		}
 	},
 	"Css": {
+		"FilterList": [
+			"YuiFilter"
+		],	
 		// config of css is same with js
 		"SrcPath": "static_source/css",
 		"DistPath": "static/css",
@@ -185,17 +194,17 @@ use -skip can skip all cached file and re-compress.
 
 ## Custom Compress
 
-All api can view in [GoWalker](http://gowalker.org/github.com/beego/compress)
+All api can view in [GoWalker](http://gowalker.org/github.com/gadelkareem/compress)
 
-* [TmpPath](http://gowalker.org/github.com/beego/compress#_variables) is default path of cached files.
-* Can modify [JsFilters / CssFilters](http://gowalker.org/github.com/beego/compress#_variables) use your compress filter.
-* Can modify [JsTagTemplate / CssTagTemplate]((http://gowalker.org/github.com/beego/compress#_variables)) with your `<script>` `<link>` tag.
+* [TmpPath](http://gowalker.org/github.com/gadelkareem/compress#_variables) is default path of cached files.
+* Can modify [JsFilters / CssFilters](http://gowalker.org/github.com/gadelkareem/compress#_variables) use your compress filter.
+* Can modify [JsTagTemplate / CssTagTemplate]((http://gowalker.org/github.com/gadelkareem/compress#_variables)) with your `<script>` `<link>` tag.
 
 ##  Contact and Issue
 
 All beego projects need your support.
 
-Any suggestion are welcome, please [add new issue](https://github.com/beego/compress/issues/new) let me known.
+Any suggestion are welcome, please [add new issue](https://github.com/gadelkareem/compress/issues/new) let me known.
 
 ## LICENSE
 

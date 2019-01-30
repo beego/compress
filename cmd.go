@@ -45,11 +45,6 @@ func (s *Settings) RunCommand(params ...string) {
 	}
 }
 
-func (s *Settings) RunCompress(force, skip, verbose bool) {
-	compressJsFiles(s, force, skip, verbose)
-	compressCssFiles(s, force, skip, verbose)
-}
-
 func printHelp(errs ...string) {
 	content := `compress command usage:
 
@@ -77,9 +72,9 @@ func (d *compressAll) Parse(args []string) {
 	if d.js && d.css {
 		name = "all"
 	} else if d.js {
-		name = "js"
+		name = Js
 	} else {
-		name = "css"
+		name = Css
 	}
 	flagSet := flag.NewFlagSet("compress command: "+name, flag.ExitOnError)
 	flagSet.BoolVar(&d.force, "force", false, "force compress file")
@@ -90,16 +85,16 @@ func (d *compressAll) Parse(args []string) {
 
 func (d *compressAll) Run(s *Settings) error {
 	if d.js {
-		compressJsFiles(s, d.force, d.skip, d.verbose)
+		s.Js.compressFiles(d.force, d.skip, d.verbose)
 	}
 	if d.css {
-		compressCssFiles(s, d.force, d.skip, d.verbose)
+		s.Css.compressFiles(d.force, d.skip, d.verbose)
 	}
 	return nil
 }
 
 func init() {
-	commands["js"] = &compressAll{js: true}
-	commands["css"] = &compressAll{css: true}
+	commands[Js] = &compressAll{js: true}
+	commands[Css] = &compressAll{css: true}
 	commands["all"] = &compressAll{js: true, css: true}
 }

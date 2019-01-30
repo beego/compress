@@ -10,57 +10,33 @@ import (
 
 var (
 	TmpPath           = "tmp"
-	JsFilters         = []Filter{ClosureFilter}
-	CssFilters        = []Filter{YuiFilter}
 	JsTagTemplate, _  = template.New("").Parse(`<script type="text/javascript" src="{{.URL}}"></script>`)
 	CssTagTemplate, _ = template.New("").Parse(`<link rel="stylesheet" href="{{.URL}}" />`)
 )
 
-type Filter func(source string) string
-
-type JsCompresser interface {
-	CompressJs(name string) template.HTML
-	SetProMode(isPro bool)
+type Compresser interface {
+	setType(t string)
+	Compress(name string) template.HTML
+	SetProdMode(isProd bool)
 	SetStaticURL(url string)
-}
-
-type CssCompresser interface {
-	CompressCss(name string) template.HTML
-	SetProMode(isPro bool)
-	SetStaticURL(url string)
+	loadFilters()
+	compressFiles(force, skip, verbose bool)
 }
 
 type Settings struct {
-	Js  JsCompresser
-	Css CssCompresser
+	Js  Compresser
+	Css Compresser
 }
 
-func NewJsCompress(srcPath, distPath, srcURL, distURL string, groups map[string]Group) JsCompresser {
-	compress := new(compressJs)
-	compress.SrcPath = srcPath
-	compress.DistPath = distPath
-	compress.SrcURL = srcURL
-	compress.DistURL = distURL
-	compress.Groups = groups
-	compress.StaticURL = "/"
-	return compress
+func (s *Settings) RunCompress(force, skip, verbose bool) {
+	s.Js.compressFiles(force, skip, verbose)
+	s.Css.compressFiles(force, skip, verbose)
 }
 
-func NewCssCompress(srcPath, distPath, srcURL, distURL string, groups map[string]Group) CssCompresser {
-	compress := new(compressCss)
-	compress.SrcPath = srcPath
-	compress.DistPath = distPath
-	compress.SrcURL = srcURL
-	compress.DistURL = distURL
-	compress.Groups = groups
-	compress.StaticURL = "/"
-	return compress
-}
-
-func LoadJsonConf(filePath string, proMode bool, staticURL string) (setting *Settings, err error) {
+func LoadJsonConf(filePath string, prodMode bool, staticURL string) (setting *Settings, err error) {
 	type Conf struct {
-		Js  *compressJs
-		Css *compressCss
+		Js  *compress
+		Css *compress
 	}
 
 	var data []byte
@@ -83,24 +59,29 @@ func LoadJsonConf(filePath string, proMode bool, staticURL string) (setting *Set
 	if conf.Js != nil {
 		setting.Js = conf.Js
 	} else {
-		setting.Js = new(compressJs)
+		setting.Js = new(compress)
 	}
+	setting.Js.setType(Js)
 
 	if conf.Css != nil {
 		setting.Css = conf.Css
 	} else {
-		setting.Css = new(compressCss)
+		setting.Css = new(compress)
 	}
+	setting.Css.setType(Css)
 
 	if staticURL == "" {
 		staticURL = "/"
 	}
 
-	setting.Js.SetProMode(proMode)
-	setting.Css.SetProMode(proMode)
+	setting.Js.SetProdMode(prodMode)
+	setting.Css.SetProdMode(prodMode)
 
 	setting.Js.SetStaticURL(staticURL)
 	setting.Css.SetStaticURL(staticURL)
+
+	setting.Js.loadFilters()
+	setting.Css.loadFilters()
 
 	return setting, nil
 }

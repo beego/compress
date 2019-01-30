@@ -5,24 +5,62 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/tdewolff/minify/v2"
+	"github.com/tdewolff/minify/v2/css"
+	"github.com/tdewolff/minify/v2/js"
 )
 
+type Filter func(source string) string
+
 var (
-	ClosureBin  = "java -jar compiler.jar"
-	ClosureArgs = map[string]string{
+	Filters = map[string]Filter{
+		"JsFilter":      JsFilter,
+		"CssFilter":     CssFilter,
+		"ClosureFilter": ClosureFilter,
+		"YuiFilter":     YuiFilter,
+	}
+
+	DefaultJsFilters  = []Filter{JsFilter}
+	DefaultCssFilters = []Filter{CssFilter}
+	closureBin        = "java -jar compiler.jar"
+	closureArgs       = map[string]string{
 		"compilation_level": "SIMPLE_OPTIMIZATIONS",
 		"warning_level":     "QUIET",
 	}
 
-	YuiBin  = "java -jar yuicompressor.jar"
-	YuiArgs = map[string]string{
-		"type": "css",
+	yuiBin  = "java -jar yuicompressor.jar"
+	yuiArgs = map[string]string{
+		"type": Css,
 	}
+	minifier *minify.M
 )
 
+func JsFilter(source string) string {
+	return runMinifier("text/javascript", source)
+}
+
+func CssFilter(source string) string {
+	return runMinifier("text/css", source)
+}
+
+func runMinifier(mediaType, source string) string {
+	if minifier == nil {
+		minifier = minify.New()
+		minifier.AddFunc("text/css", css.Minify)
+		minifier.AddFunc("text/javascript", js.Minify)
+	}
+	s, err := minifier.String(mediaType, source)
+	if err != nil {
+		logError(err.Error())
+		return source
+	}
+	return s
+}
+
 func ClosureFilter(source string) string {
-	args := strings.Fields(ClosureBin)
-	for arg, value := range ClosureArgs {
+	args := strings.Fields(closureBin)
+	for arg, value := range closureArgs {
 		args = append(args, "--"+arg)
 		args = append(args, value)
 	}
@@ -30,8 +68,8 @@ func ClosureFilter(source string) string {
 }
 
 func YuiFilter(source string) string {
-	args := strings.Fields(YuiBin)
-	for arg, value := range YuiArgs {
+	args := strings.Fields(yuiBin)
+	for arg, value := range yuiArgs {
 		args = append(args, "--"+arg)
 		args = append(args, value)
 	}

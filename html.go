@@ -1,64 +1,173 @@
 package compress
 
 import (
+	"bytes"
 	"fmt"
-	"html/template"
 	"os"
-	"path"
 	"path/filepath"
 	"strings"
+	"time"
+	"html/template"
+	"path"
 )
 
-type Group struct {
-	DistFile    string
-	SourceFiles []string
-	SkipFiles   []string
+func compressFiles(c *compress, force, skip, verbose bool) {
+	os.MkdirAll(TmpPath, 0755)
+
+	for name, group := range c.Groups {
+
+		hasError := false
+		hasModified := false
+		sources := make([]string, 0, len(group.SourceFiles))
+
+		if verbose {
+			logInfo("Group '%s'", name)
+			logInfo("--------------------------")
+		}
+
+		skips := make(map[string]bool, len(group.SkipFiles))
+		for _, file := range group.SkipFiles {
+			skips[file] = true
+		}
+
+		for _, file := range group.SourceFiles {
+
+			modified := false
+
+			var cacheTime *time.Time
+			cacheFile := filepath.Join(TmpPath, c.SrcPath, file)
+			if info, err := os.Stat(cacheFile); err == nil {
+				// get cached file modtime
+				t := info.ModTime()
+				cacheTime = &t
+			}
+
+			sourceFile := filepath.Join(c.SrcPath, file)
+			if info, err := os.Stat(sourceFile); err == nil {
+				if cacheTime != nil {
+					if info.ModTime().Unix() > cacheTime.Unix() {
+						// file modified
+						modified = true
+					}
+				} else {
+					modified = true
+				}
+			} else {
+				logError("source file %s load error: %s", sourceFile, err.Error())
+				hasError = true
+				continue
+			}
+
+			if skip || modified {
+				buf := bytes.NewBufferString("")
+				// load content from file
+				if f, err := os.Open(sourceFile); err == nil {
+					buf.ReadFrom(f)
+					f.Close()
+				} else {
+					logError("source file %s load error: %s", sourceFile, err.Error())
+					hasError = true
+					continue
+				}
+
+				source := buf.String()
+				if verbose {
+					logInfo("compress file %s ... ", sourceFile)
+				}
+				if skips[file] {
+					if verbose {
+						logInfo("skiped ")
+					}
+				} else {
+					for _, filter := range c.filters {
+						// compress content
+						source = filter(source)
+					}
+				}
+				sources = append(sources, source)
+
+				var writeErr error
+				dir, _ := filepath.Split(cacheFile)
+				if writeErr = os.MkdirAll(dir, 0755); writeErr == nil {
+					if f, err := os.OpenFile(cacheFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644); err == nil {
+						if _, err := f.WriteString(source); err == nil {
+							hasModified = true
+							if verbose {
+								logInfo("saved")
+							}
+						} else {
+							writeErr = err
+						}
+						f.Close()
+					} else {
+						writeErr = err
+					}
+				}
+
+				if writeErr != nil {
+					logError("write error: %s", writeErr.Error())
+					hasError = true
+				}
+
+			} else {
+				buf := bytes.NewBufferString("")
+				// load content from file
+				if f, err := os.Open(cacheFile); err == nil {
+					buf.ReadFrom(f)
+				} else {
+					logError("cache file %s load error: %s", cacheFile, err.Error())
+					hasError = true
+					continue
+				}
+
+				if verbose {
+					logInfo("use cache file %s", cacheFile)
+				}
+				sources = append(sources, buf.String())
+			}
+		}
+
+		if !hasError {
+			if hasModified || force {
+				distFile := filepath.Join(c.DistPath, group.DistFile)
+				var writeErr error
+				dir, _ := filepath.Split(distFile)
+				if writeErr = os.MkdirAll(dir, 0755); writeErr == nil {
+					if f, err := os.OpenFile(distFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644); err == nil {
+						if _, err := f.WriteString(strings.Join(sources, "\n\n")); err == nil {
+							if verbose {
+								logInfo("compressed file %s ... saved", distFile)
+							}
+						} else {
+							writeErr = err
+						}
+						f.Close()
+
+					} else {
+						writeErr = err
+					}
+				}
+
+				if writeErr != nil {
+					logError("compressed file %s write error: %s", distFile, writeErr.Error())
+					hasError = true
+				}
+			} else {
+				if verbose {
+					logInfo("not modified")
+				}
+			}
+		}
+
+		if verbose {
+			logInfo("")
+		}
+	}
 }
 
-type compress struct {
-	StaticURL string
-	SrcPath   string
-	DistPath  string
-	SrcURL    string
-	DistURL   string
-	Groups    map[string]Group
-	IsProMode bool
-	caches    map[string]template.HTML
-}
-
-func (c *compress) SetProMode(isPro bool) {
-	c.IsProMode = isPro
-}
-
-func (c *compress) SetStaticURL(url string) {
-	c.StaticURL = url
-}
-
-func errHtml(err string, args ...interface{}) string {
-	err = fmt.Sprintf("Beego Compress: "+err, args...)
-	fmt.Fprintln(os.Stderr, err)
-	return "<!-- " + err + " -->"
-}
-
-type compressJs struct {
-	compress
-}
-
-func (c *compressJs) CompressJs(name string) template.HTML {
-	return generateHTML(name, c.compress, JsTagTemplate)
-}
-
-type compressCss struct {
-	compress
-}
-
-func (c *compressCss) CompressCss(name string) template.HTML {
-	return generateHTML(name, c.compress, CssTagTemplate)
-}
-
-func generateHTML(name string, c compress, t *template.Template) template.HTML {
+func generateHTML(name string, c *compress, t *template.Template) template.HTML {
 	if group, ok := c.Groups[name]; ok {
-		if c.IsProMode {
+		if c.IsProdMode {
 
 			if c.caches == nil {
 				c.caches = make(map[string]template.HTML, len(c.Groups))
@@ -68,7 +177,7 @@ func generateHTML(name string, c compress, t *template.Template) template.HTML {
 				return scripts
 			}
 
-			scripts := fmt.Sprintf("<script>/* Beego Compress Powered */</script>\n\t")
+			scripts := ""
 
 			filePath := filepath.Join(c.DistPath, group.DistFile)
 			if info, err := os.Stat(filePath); err == nil {
